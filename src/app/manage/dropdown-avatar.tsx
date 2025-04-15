@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { toast } from '@/hooks/use-toast'
 import { handleErrorApi } from '@/lib/utils'
-import { useAccountProfile } from '@/queries/useAccount'
+import { useAccountMe } from '@/queries/useAccount'
 import { useLogoutMutation } from '@/queries/useAuth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -20,7 +20,7 @@ import { useRouter } from 'next/navigation'
 export default function DropdownAvatar() {
   const logoutMutation = useLogoutMutation()
   const router = useRouter()
-  const { data } = useAccountProfile()
+  const { data } = useAccountMe()
   const profile = data?.payload.data
   const handleLogout = async () => {
     if (logoutMutation.isPending) return
