@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { toast } from '@/hooks/use-toast'
+import { handleErrorApi } from '@/lib/utils'
+import { useChangePasswordMutation } from '@/queries/useAccount'
 import {
   ChangePasswordBody,
   ChangePasswordBodyType,
@@ -13,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
 export default function ChangePasswordForm() {
+  const changePasswordMutation = useChangePasswordMutation()
   const form = useForm<ChangePasswordBodyType>({
     resolver: zodResolver(ChangePasswordBody),
     defaultValues: {
@@ -21,11 +25,30 @@ export default function ChangePasswordForm() {
       confirmPassword: '',
     },
   })
+  const onSubmit = async (data: ChangePasswordBodyType) => {
+    if (changePasswordMutation.isPending) return
+    try {
+      const result = await changePasswordMutation.mutateAsync(data)
+      form.reset()
+      toast({
+        description: result.payload.message,
+      })
+    } catch (error: any) {
+      handleErrorApi({
+        error,
+      })
+    }
+  }
+  const reset = () => {
+    form.reset()
+  }
   return (
     <Form {...form}>
       <form
         noValidate
         className="grid auto-rows-max items-start gap-4 md:gap-8"
+        onReset={reset}
+        onSubmit={form.handleSubmit(onSubmit)}
       >
         <Card className="overflow-hidden" x-chunk="dashboard-07-chunk-4">
           <CardHeader>
@@ -79,7 +102,7 @@ export default function ChangePasswordForm() {
                     <div className="grid gap-3">
                       <Label htmlFor="password">Nhập lại mật khẩu mới</Label>
                       <Input
-                        id="password"
+                        id="confirmPassword"
                         type="password"
                         placeholder="Nhập lại mật khẩu mới"
                         className="w-full"
@@ -91,7 +114,7 @@ export default function ChangePasswordForm() {
                 )}
               />
               <div className="items-center gap-2 md:ml-auto flex">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" type="reset">
                   Hủy
                 </Button>
                 <Button size="sm" type="submit">
