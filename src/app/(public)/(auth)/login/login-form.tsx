@@ -1,5 +1,6 @@
 'use client'
 
+import { useAppContext } from '@/components/app-provider'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -12,15 +13,19 @@ import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/hooks/use-toast'
-import { handleErrorApi } from '@/lib/utils'
+import { handleErrorApi, removeTokenFromLocalStorage } from '@/lib/utils'
 import { useLoginMutation } from '@/queries/useAuth'
 import { LoginBody, LoginBodyType } from '@/schemaValidations/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 export default function LoginForm() {
   const loginMutation = useLoginMutation()
+  const searchParams = useSearchParams()
+  const clearTokens = searchParams.get('clearTokens')
+  const { setIsAuth } = useAppContext()
   const router = useRouter()
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
@@ -30,10 +35,17 @@ export default function LoginForm() {
     },
   })
 
+  useEffect(() => {
+    if (clearTokens) {
+      setIsAuth(false)
+    }
+  }, [clearTokens, setIsAuth])
+
   const onSubmit = async (data: LoginBodyType) => {
     if (loginMutation.isPending) return
     try {
       const result = await loginMutation.mutateAsync(data)
+      setIsAuth(true)
       toast({
         description: result.payload.message,
       })

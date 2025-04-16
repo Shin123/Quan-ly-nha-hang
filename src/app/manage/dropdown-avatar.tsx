@@ -1,5 +1,6 @@
 'use client'
 
+import { useAppContext } from '@/components/app-provider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,11 +22,13 @@ export default function DropdownAvatar() {
   const logoutMutation = useLogoutMutation()
   const router = useRouter()
   const { data } = useAccountMe()
+  const { setIsAuth } = useAppContext()
   const profile = data?.payload.data
   const handleLogout = async () => {
     if (logoutMutation.isPending) return
     try {
       const result = await logoutMutation.mutateAsync()
+      setIsAuth(false)
       toast({
         description: result.payload.message,
       })

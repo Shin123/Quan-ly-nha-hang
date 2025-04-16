@@ -12,7 +12,9 @@ export function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get('refreshToken')?.value || ''
   // no auth will can't access to private paths
   if (privatePaths.some((path) => pathname.startsWith(path)) && !refreshToken) {
-    return NextResponse.redirect(new URL('/logout', request.url))
+    const url = new URL('/login', request.url)
+    url.searchParams.set('clearTokens', 'true')
+    return NextResponse.redirect(url)
   }
 
   // auth will can't access to unAuth paths
