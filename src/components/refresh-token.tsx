@@ -7,14 +7,14 @@ import {
   setAccessTokenToLocalStorage,
   setRefreshTokenToLocalStorage,
 } from '@/lib/utils'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import authApiRequest from '@/apiRequests/auth'
 
 const UNAUTHENTICATED_PATHS = ['/login', '/logout', '/refresh-token']
 export default function RefreshToken() {
   const pathname = usePathname()
-  console.log(pathname)
+  const router = useRouter()
   useEffect(() => {
     if (UNAUTHENTICATED_PATHS.includes(pathname)) return
     let interval: any = null
@@ -23,12 +23,22 @@ export default function RefreshToken() {
     checkAndRefreshToken({
       onError: () => {
         clearInterval(interval)
+        router.push('/login')
       },
     })
-    interval = setInterval(checkAndRefreshToken, TIMEOUT)
+    interval = setInterval(
+      () =>
+        checkAndRefreshToken({
+          onError: () => {
+            clearInterval(interval)
+            router.push('/login')
+          },
+        }),
+      TIMEOUT
+    )
     return () => {
       clearInterval(interval)
     }
-  }, [pathname])
+  }, [pathname, router])
   return null
 }
