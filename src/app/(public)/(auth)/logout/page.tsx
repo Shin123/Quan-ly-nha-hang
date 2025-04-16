@@ -5,7 +5,7 @@ import {
   getRefreshTokenFromLocalStorage,
 } from '@/lib/utils'
 import { useLogoutMutation } from '@/queries/useAuth'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 export default function Logout() {
