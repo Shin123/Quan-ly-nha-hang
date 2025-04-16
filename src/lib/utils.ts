@@ -76,7 +76,7 @@ export const checkAndRefreshToken = async (param?: {
     exp: number
     iat: number
   }
-  const now = Math.round(new Date().getTime() / 1000)
+  const now = new Date().getTime() / 1000 - 1
   if (decodedRefreshToken.exp <= now) {
     removeTokenFromLocalStorage()
     return param?.onError && param.onError()
