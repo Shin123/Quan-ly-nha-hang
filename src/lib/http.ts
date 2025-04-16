@@ -134,10 +134,9 @@ const request = async <Response>(
           }
         }
       } else {
-        const accessToken =
-          options?.headers instanceof Headers
-            ? options.headers.get('Authorization')?.split('Bearer ')[1]
-            : undefined
+        const accessToken = (options?.headers as any)?.Authorization?.split(
+          'Bearer '
+        )[1]
         redirect(`/logout?accessToken=${accessToken}`)
       }
     } else {
