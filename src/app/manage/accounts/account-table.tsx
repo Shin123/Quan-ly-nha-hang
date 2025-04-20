@@ -56,6 +56,7 @@ import AddEmployee from './add-employee'
 import EditEmployee from './edit-employee'
 import { toast } from '@/hooks/use-toast'
 import { handleErrorApi } from '@/lib/utils'
+import AutoPagination from '@/components/auto-pagination'
 
 type AccountItem = AccountListResType['data'][0]
 
@@ -267,7 +268,14 @@ export default function AccountTable() {
           setEmployeeDelete={setEmployeeDelete}
         />
         <div className="flex items-center py-4">
-          <Input placeholder="Filter emails..." className="max-w-sm" />
+          <Input
+            placeholder="Filter emails..."
+            className="max-w-sm"
+            value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn('email')?.setFilterValue(event.target.value)
+            }
+          />
           <div className="ml-auto flex items-center gap-2">
             <AddEmployee />
           </div>
@@ -321,6 +329,19 @@ export default function AccountTable() {
               )}
             </TableBody>
           </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="text-xs text-muted-foreground py-4 flex-1">
+            Hiển thị{' '}
+            <strong>{table.getPaginationRowModel().rows.length}</strong> kết quả
+          </div>
+          <div>
+            <AutoPagination
+              page={table.getState().pagination.pageIndex + 1}
+              pageSize={table.getPageCount()}
+              pathname="/manage/accounts"
+            />
+          </div>
         </div>
       </div>
     </AccountTableContext.Provider>
