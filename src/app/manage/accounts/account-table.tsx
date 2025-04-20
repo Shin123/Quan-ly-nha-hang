@@ -1,8 +1,25 @@
 'use client'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { useSearchParams } from 'next/navigation'
-import AddEmployee from './add-emloyee'
 import {
   Table,
   TableBody,
@@ -11,10 +28,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useGetAccountList } from '@/queries/useAccount'
 import {
   AccountListResType,
   AccountType,
 } from '@/schemaValidations/account.schema'
+import { AvatarFallback } from '@radix-ui/react-avatar'
+import { CaretSortIcon, DotsHorizontalIcon } from '@radix-ui/react-icons'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -27,30 +47,10 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
+import { useSearchParams } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
-import { Avatar, AvatarImage } from '@/components/ui/avatar'
-import { AvatarFallback } from '@radix-ui/react-avatar'
-import { Button } from '@/components/ui/button'
-import { CaretSortIcon, DotsHorizontalIcon } from '@radix-ui/react-icons'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import EditEmployee from './edit-emloyee'
-import { useGetAccountList } from '@/queries/useAccount'
+import AddEmployee from './add-employee'
+import EditEmployee from './edit-employee'
 
 type AccountItem = AccountListResType['data'][0]
 
@@ -238,9 +238,9 @@ export default function AccountTable() {
     >
       <div className="w-full">
         <EditEmployee
-        // id={employeeIdEdit}
-        // setId={setEmployeeIdEdit}
-        // onSubmitSuccess={() => {}}
+          id={employeeIdEdit}
+          setId={setEmployeeIdEdit}
+          onSubmitSuccess={() => {}}
         />
         <AlertDialogDeleteAccount
           employeeDelete={employeeDelete}
