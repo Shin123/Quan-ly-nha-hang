@@ -7,6 +7,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
@@ -26,7 +27,30 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
+import { AvatarFallback } from '@radix-ui/react-avatar'
+import { Button } from '@/components/ui/button'
+import { CaretSortIcon, DotsHorizontalIcon } from '@radix-ui/react-icons'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import EditEmployee from './edit-emloyee'
+import { useGetAccountList } from '@/queries/useAccount'
 
 type AccountItem = AccountListResType['data'][0]
 
@@ -47,7 +71,112 @@ export const columns: ColumnDef<AccountType>[] = [
     accessorKey: 'id',
     header: 'ID',
   },
+  {
+    accessorKey: 'avatar',
+    header: 'Avatar',
+    cell: ({ row }) => (
+      <div>
+        <Avatar className="aspect-auto w-[100px] h-[100px] rounded-md object-cover">
+          <AvatarImage src={row.getValue('avatar')} />
+          <AvatarFallback className="rounded-none">
+            {row.original.name}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'name',
+    header: 'Tên',
+    cell: ({ row }) => <div>{row.getValue('name')}</div>,
+  },
+  {
+    accessorKey: 'email',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant={'ghost'}
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Email
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
+  },
+  {
+    id: 'actions',
+    enableHiding: false,
+    cell: function Actions({ row }) {
+      const { setEmployeeIdEdit, setEmployeeDelete } =
+        useContext(AccountTableContext)
+      const openEditEmployee = () => {
+        setEmployeeIdEdit(row.original.id)
+      }
+
+      const openDeleteEmployee = () => {
+        setEmployeeDelete(row.original)
+      }
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={'ghost'} className="h-8 w-8 p-0">
+              <span className="sr-only">Open Menu</span>
+              <DotsHorizontalIcon className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={openEditEmployee}>Sửa</DropdownMenuItem>
+            <DropdownMenuItem onClick={openDeleteEmployee}>
+              Xóa
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
+  },
 ]
+
+function AlertDialogDeleteAccount({
+  employeeDelete,
+  setEmployeeDelete,
+}: {
+  employeeDelete: AccountItem | null
+  setEmployeeDelete: (value: AccountItem | null) => void
+}) {
+  return (
+    <AlertDialog
+      open={Boolean(employeeDelete)}
+      onOpenChange={(value) => {
+        if (!value) {
+          setEmployeeDelete(null)
+        }
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Bạn có chắc chắn muốn xóa tài khoản này?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Tài khoản{' '}
+            <span className="bg-foreground text-primary-foreground rounded px-1">
+              {employeeDelete?.name}
+            </span>{' '}
+            sẽ bị xóa vĩnh viễn
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction>Continue</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
 
 const PAGE_SIZE = 10
 export default function AccountTable() {
@@ -57,8 +186,9 @@ export default function AccountTable() {
 
   const [employeeIdEdit, setEmployeeIdEdit] = useState<number | undefined>()
   const [employeeDelete, setEmployeeDelete] = useState<AccountItem | null>(null)
+  const accountListQuery = useGetAccountList()
 
-  const data: any[] = []
+  const data = accountListQuery.data?.payload.data ?? []
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -107,6 +237,15 @@ export default function AccountTable() {
       }}
     >
       <div className="w-full">
+        <EditEmployee
+        // id={employeeIdEdit}
+        // setId={setEmployeeIdEdit}
+        // onSubmitSuccess={() => {}}
+        />
+        <AlertDialogDeleteAccount
+          employeeDelete={employeeDelete}
+          setEmployeeDelete={setEmployeeDelete}
+        />
         <div className="flex items-center py-4">
           <Input placeholder="Filter emails..." className="max-w-sm" />
           <div className="ml-auto flex items-center gap-2">
@@ -120,14 +259,14 @@ export default function AccountTable() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHeader key={header.id}>
+                      <TableHead key={header.id}>
                         {header.isPlaceholder
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
                               header.getContext()
                             )}
-                      </TableHeader>
+                      </TableHead>
                     )
                   })}
                 </TableRow>
