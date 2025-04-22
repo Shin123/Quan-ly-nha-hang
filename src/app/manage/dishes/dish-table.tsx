@@ -49,6 +49,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 import EditDish from './edit-dish'
 import AddDish from './add-dish'
+import { useGetDishList } from '@/queries/useDish'
 
 type DishItem = DishListResType['data'][0]
 
@@ -186,13 +187,14 @@ export default function DishTable() {
   const pageIndex = page - 1
   const [dishIdEdit, setDishIdEdit] = useState<number | undefined>()
   const [dishDelete, setDishDelete] = useState<DishItem | null>(null)
-  const data: any[] = []
+  const getDishList = useGetDishList()
+  const data = getDishList.data?.payload.data ?? []
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [pagination, setPagination] = useState({
-    pageIndex, // Gía trị mặc định ban đầu, không có ý nghĩa khi data được fetch bất đồng bộ
+    pageIndex,
     pageSize: PAGE_SIZE, //default page size
   })
 
