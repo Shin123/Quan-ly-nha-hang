@@ -28,7 +28,10 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { DishStatus, DishStatusValues } from '@/constants/type'
-import { getVietnameseDishStatus } from '@/lib/utils'
+import { toast } from '@/hooks/use-toast'
+import { getVietnameseDishStatus, handleErrorApi } from '@/lib/utils'
+import { useAddDishMutation } from '@/queries/useDish'
+import { useUploadMediaMutation } from '@/queries/useMedia'
 import {
   CreateDishBody,
   CreateDishBodyType,
@@ -42,13 +45,15 @@ export default function AddDish() {
   const [file, setFile] = useState<File | null>(null)
   const [open, setOpen] = useState(false)
   const imageInputRef = useRef<HTMLInputElement | null>(null)
+  const addDishMutation = useAddDishMutation()
+  const uploadImageMutation = useUploadMediaMutation()
   const form = useForm<CreateDishBodyType>({
     resolver: zodResolver(CreateDishBody),
     defaultValues: {
       name: '',
       description: '',
       price: 0,
-      image: '',
+      image: undefined,
       status: DishStatus.Unavailable,
     },
   })
@@ -60,6 +65,39 @@ export default function AddDish() {
     }
     return image
   }, [file, image])
+
+  const reset = () => {
+    form.reset()
+    setFile(null)
+  }
+
+  const onSubmit = async (values: CreateDishBodyType) => {
+    if (addDishMutation.isPending) return
+    try {
+      let body = values
+      const formData = new FormData()
+      if (file) {
+        formData.append('file', file)
+        const uploadImageRes = await uploadImageMutation.mutateAsync(formData)
+        const imageUrl = uploadImageRes.payload.data
+        body = {
+          ...values,
+          image: imageUrl,
+        }
+      }
+      const result = await addDishMutation.mutateAsync(body)
+      toast({
+        description: result.payload.message,
+      })
+      reset()
+      setOpen(false)
+    } catch (error) {
+      handleErrorApi({
+        error,
+        setError: form.setError,
+      })
+    }
+  }
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
@@ -79,6 +117,8 @@ export default function AddDish() {
             noValidate
             className="grid auto-rows-max items-start gap-4 md:gap-8"
             id="add-dish-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            onReset={reset}
           >
             <div className="grid gap-4 py-4">
               <FormField
@@ -115,6 +155,7 @@ export default function AddDish() {
                         <span className="sr-only">Upload</span>
                       </button>
                     </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
