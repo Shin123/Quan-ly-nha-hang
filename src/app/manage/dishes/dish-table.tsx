@@ -30,7 +30,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { formatCurrency, getVietnameseDishStatus } from '@/lib/utils'
+import { toast } from '@/hooks/use-toast'
+import {
+  formatCurrency,
+  getVietnameseDishStatus,
+  handleErrorApi,
+} from '@/lib/utils'
+import { useDeleteDishMutation, useGetDishList } from '@/queries/useDish'
 import { DishListResType } from '@/schemaValidations/dish.schema'
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import {
@@ -45,12 +51,11 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { useParams, useSearchParams } from 'next/navigation'
-import { createContext, useContext, useEffect, useState } from 'react'
-import EditDish from './edit-dish'
-import AddDish from './add-dish'
-import { useGetDishList } from '@/queries/useDish'
 import DOMPurify from 'dompurify'
+import { useSearchParams } from 'next/navigation'
+import { createContext, useContext, useEffect, useState } from 'react'
+import AddDish from './add-dish'
+import EditDish from './edit-dish'
 
 type DishItem = DishListResType['data'][0]
 
@@ -153,6 +158,22 @@ function AlertDialogDeleteDish({
   dishDelete: DishItem | null
   setDishDelete: (value: DishItem | null) => void
 }) {
+  const { mutateAsync } = useDeleteDishMutation()
+  const deleteDish = async () => {
+    if (dishDelete) {
+      try {
+        const result = await mutateAsync(dishDelete.id)
+        setDishDelete(null)
+        toast({
+          description: result.payload.message,
+        })
+      } catch (error) {
+        handleErrorApi({
+          error,
+        })
+      }
+    }
+  }
   return (
     <AlertDialog
       open={Boolean(dishDelete)}
@@ -175,7 +196,7 @@ function AlertDialogDeleteDish({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={deleteDish}>Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
