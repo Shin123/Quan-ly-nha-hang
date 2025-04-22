@@ -5,6 +5,7 @@ import { EntityError } from './http'
 import { toast } from '@/hooks/use-toast'
 import jwt from 'jsonwebtoken'
 import authApiRequest from '@/apiRequests/auth'
+import { DishStatus } from '@/constants/type'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -95,5 +96,25 @@ export const checkAndRefreshToken = async (param?: {
     } catch (error) {
       param?.onError && param.onError()
     }
+  }
+}
+
+export const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(value)
+}
+
+export const getVietnameseDishStatus = (
+  status: (typeof DishStatus)[keyof typeof DishStatus]
+) => {
+  switch (status) {
+    case DishStatus.Available:
+      return 'Có sẵn'
+    case DishStatus.Unavailable:
+      return 'Không có sẵn'
+    default:
+      return 'Ẩn'
   }
 }
