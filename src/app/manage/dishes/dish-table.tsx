@@ -50,6 +50,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import EditDish from './edit-dish'
 import AddDish from './add-dish'
 import { useGetDishList } from '@/queries/useDish'
+import DOMPurify from 'dompurify'
 
 type DishItem = DishListResType['data'][0]
 
@@ -100,7 +101,9 @@ export const columns: ColumnDef<DishItem>[] = [
     cell: ({ row }) => (
       <div
         className="whitespace-pre-line"
-        dangerouslySetInnerHTML={{ __html: row.getValue('description') }}
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(row.getValue('description')),
+        }}
       />
     ),
   },
