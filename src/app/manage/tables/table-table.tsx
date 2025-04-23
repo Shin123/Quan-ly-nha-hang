@@ -30,8 +30,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { getVietnameseTableStatus } from '@/lib/utils'
-import { useTableListQuery } from '@/queries/useTable'
+import { toast } from '@/hooks/use-toast'
+import { getVietnameseTableStatus, handleErrorApi } from '@/lib/utils'
+import { useDeleteTableMutation, useTableListQuery } from '@/queries/useTable'
 import { TableListResType } from '@/schemaValidations/table.schema'
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import {
@@ -72,6 +73,10 @@ export const columns: ColumnDef<TableItem>[] = [
     cell: ({ row }) => (
       <div className="capitalize">{row.getValue('number')}</div>
     ),
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue) return true
+      return String(filterValue) === String(row.getValue('number'))
+    },
   },
   {
     accessorKey: 'capacity',
@@ -139,6 +144,23 @@ function AlertDialogDeleteTable({
   tableDelete: TableItem | null
   setTableDelete: (value: TableItem | null) => void
 }) {
+  const { mutateAsync } = useDeleteTableMutation()
+  const deleteTable = async () => {
+    if (tableDelete) {
+      try {
+        const result = await mutateAsync(tableDelete.number)
+        toast({
+          description: result.payload.message,
+        })
+        setTableDelete(null)
+      } catch (error) {
+        handleErrorApi({
+          error,
+        })
+      }
+    }
+  }
+
   return (
     <AlertDialog
       open={!!tableDelete}
@@ -157,7 +179,7 @@ function AlertDialogDeleteTable({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={deleteTable}>Continue</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
