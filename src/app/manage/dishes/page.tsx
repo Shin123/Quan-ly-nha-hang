@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import DishTable from './dish-table'
+import { Suspense } from 'react'
 
 export default function DishesPage() {
   return (
@@ -17,7 +18,9 @@ export default function DishesPage() {
             <CardDescription>Quản lý món ăn</CardDescription>
           </CardHeader>
           <CardContent>
-            <DishTable />
+            <Suspense fallback={<div>Loading...</div>}>
+              <DishTable />
+            </Suspense>
           </CardContent>
         </Card>
       </div>

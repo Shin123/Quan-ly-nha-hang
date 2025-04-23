@@ -5,7 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import React from 'react'
+import React, { Suspense } from 'react'
 import TableTable from './table-table'
 
 export default function TablesPage() {
@@ -18,7 +18,9 @@ export default function TablesPage() {
             <CardDescription>Quản lý bàn ăn</CardDescription>
           </CardHeader>
           <CardContent>
-            <TableTable />
+            <Suspense fallback={<div>Loading...</div>}>
+              <TableTable />
+            </Suspense>
           </CardContent>
         </Card>
       </div>
