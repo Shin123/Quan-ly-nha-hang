@@ -7,28 +7,50 @@ import { useEffect, useRef } from 'react'
 export default async function QRCodeTable({
   token,
   tableNumber,
-  width = 200,
+  width = 250,
 }: {
   token: string
   tableNumber: number
   width?: number
 }) {
-  // const { token, tableNumber } = props
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
-    const canvas = canvasRef.current
+    const canvas = canvasRef.current!
+    canvas.height = width + 70
+    canvas.width = width
+    const canvasContext = canvas.getContext('2d')!
+    canvasContext.fillStyle = '#fff'
+    canvasContext.fillRect(0, 0, canvas.width, canvas.height)
+    canvasContext.font = '20px Arial'
+    canvasContext.textAlign = 'center'
+    canvasContext.fillStyle = '#000'
+    canvasContext.fillText(
+      `Bàn số ${tableNumber}`,
+      canvas.width / 2,
+      canvas.width + 20
+    )
+    canvasContext.fillText(
+      'Quét mã để đặt bàn',
+      canvas.width / 2,
+      canvas.width + 50
+    )
+    const virtualCanvas = document.createElement('canvas')
     QRCode.toCanvas(
-      canvas,
+      virtualCanvas,
       getTableLink({
         token,
         tableNumber,
       }),
+      {
+        width: width,
+        margin: 4,
+      },
       function (error) {
         if (error) console.error(error)
-        console.log('success!')
+        canvasContext.drawImage(virtualCanvas, 0, 0, width, width)
       }
     )
-  }, [token, tableNumber])
+  }, [token, width, tableNumber])
 
   return <canvas ref={canvasRef} />
 }
