@@ -7,6 +7,8 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogDescription,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import {
   Form,
@@ -35,7 +37,6 @@ import {
   UpdateDishBodyType,
 } from '@/schemaValidations/dish.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
 import { Upload } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'

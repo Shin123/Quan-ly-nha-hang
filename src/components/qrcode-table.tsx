@@ -4,7 +4,7 @@ import { getTableLink } from '@/lib/utils'
 import QRCode from 'qrcode'
 import { useEffect, useRef } from 'react'
 
-export default async function QRCodeTable({
+export default function QRCodeTable({
   token,
   tableNumber,
   width = 250,

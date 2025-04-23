@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import {
   Form,
@@ -119,6 +120,7 @@ export default function AddDish() {
       <DialogContent className="sm:max-w-[600px] max-h-screen overflow-auto">
         <DialogHeader>
           <DialogTitle>Thêm món ăn</DialogTitle>
+          <DialogDescription>Các trường bắt buộc: Ảnh, tên</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form

@@ -18,9 +18,7 @@ export default function DishesPage() {
             <CardDescription>Quản lý món ăn</CardDescription>
           </CardHeader>
           <CardContent>
-            <Suspense fallback={<div>Loading...</div>}>
-              <DishTable />
-            </Suspense>
+            <DishTable />
           </CardContent>
         </Card>
       </div>

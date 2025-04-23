@@ -18,9 +18,7 @@ export default function TablesPage() {
             <CardDescription>Quản lý bàn ăn</CardDescription>
           </CardHeader>
           <CardContent>
-            <Suspense fallback={<div>Loading...</div>}>
-              <TableTable />
-            </Suspense>
+            <TableTable />
           </CardContent>
         </Card>
       </div>

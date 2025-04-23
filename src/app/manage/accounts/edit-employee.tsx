@@ -226,6 +226,7 @@ export default function EditEmployee({
                       <Label htmlFor="changePassword">Đổi mật khẩu</Label>
                       <div className="col-span-3 w-full space-y-2">
                         <Switch
+                          id="changePassword"
                           checked={field.value}
                           onCheckedChange={field.onChange}
                         />

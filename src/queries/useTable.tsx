@@ -10,7 +10,7 @@ export const useTableListQuery = () => {
   })
 }
 
-export const useGetTableDetail = ({ id }: { id: number }) => {
+export const useGetTableQuery = (id: number) => {
   return useQuery({
     queryKey: ['table-detail', id],
     queryFn: () => tableApiRequest.getTable(id),

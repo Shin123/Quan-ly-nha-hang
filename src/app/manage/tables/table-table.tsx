@@ -1,6 +1,7 @@
 'use client'
 
 import AutoPagination from '@/components/auto-pagination'
+import QRCodeTable from '@/components/qrcode-table'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +30,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { getTableLink, getVietnameseTableStatus } from '@/lib/utils'
+import { getVietnameseTableStatus } from '@/lib/utils'
+import { useTableListQuery } from '@/queries/useTable'
 import { TableListResType } from '@/schemaValidations/table.schema'
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import {
@@ -48,8 +50,6 @@ import { useSearchParams } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 import AddTable from './add-table'
 import EditTable from './edit-table'
-import { useTableListQuery } from '@/queries/useTable'
-import QRCodeTable from '@/components/qrcode-table'
 
 type TableItem = TableListResType['data'][0]
 
@@ -217,7 +217,7 @@ export default function TableTable() {
       value={{ tableIdEdit, setTableIdEdit, tableDelete, setTableDelete }}
     >
       <div className="w-full">
-        <EditTable id={tableIdEdit} setId={setTableIdEdit} />
+        <EditTable id={tableIdEdit!} setId={setTableIdEdit} />
         <AlertDialogDeleteTable
           tableDelete={tableDelete}
           setTableDelete={setTableDelete}
