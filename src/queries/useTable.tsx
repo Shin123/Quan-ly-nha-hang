@@ -3,7 +3,7 @@ import { UpdateTableBodyType } from '@/schemaValidations/table.schema'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-export const useGetTableList = () => {
+export const useTableListQuery = () => {
   return useQuery({
     queryKey: ['table-list'],
     queryFn: tableApiRequest.list,

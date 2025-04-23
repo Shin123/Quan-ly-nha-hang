@@ -5,7 +5,9 @@ import { EntityError } from './http'
 import { toast } from '@/hooks/use-toast'
 import jwt from 'jsonwebtoken'
 import authApiRequest from '@/apiRequests/auth'
-import { DishStatus } from '@/constants/type'
+import { DishStatus, TableStatus } from '@/constants/type'
+import { Table } from 'lucide-react'
+import envConfig from '@/config'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -117,4 +119,28 @@ export const getVietnameseDishStatus = (
     default:
       return 'Ẩn'
   }
+}
+export const getVietnameseTableStatus = (
+  status: (typeof TableStatus)[keyof typeof TableStatus]
+) => {
+  switch (status) {
+    case TableStatus.Available:
+      return 'Bàn trống'
+    case TableStatus.Reserved:
+      return 'Đã đặt'
+    default:
+      return 'Ẩn'
+  }
+}
+
+export const getTableLink = ({
+  token,
+  tableNumber,
+}: {
+  token: string
+  tableNumber: number
+}) => {
+  return (
+    envConfig.NEXT_PUBLIC_URL + '/tables/' + tableNumber + `?token=${token}`
+  )
 }

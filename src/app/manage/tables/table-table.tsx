@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { getVietnameseTableStatus } from '@/lib/utils'
+import { getTableLink, getVietnameseTableStatus } from '@/lib/utils'
 import { TableListResType } from '@/schemaValidations/table.schema'
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import {
@@ -48,6 +48,8 @@ import { useSearchParams } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 import AddTable from './add-table'
 import EditTable from './edit-table'
+import { useTableListQuery } from '@/queries/useTable'
+import QRCodeTable from '@/components/qrcode-table'
 
 type TableItem = TableListResType['data'][0]
 
@@ -88,7 +90,14 @@ export const columns: ColumnDef<TableItem>[] = [
   {
     accessorKey: 'token',
     header: 'QR Code',
-    cell: ({ row }) => <div>{row.getValue('number')}</div>,
+    cell: ({ row }) => (
+      <div>
+        <QRCodeTable
+          token={row.getValue('token')}
+          tableNumber={row.getValue('number')}
+        />
+      </div>
+    ),
   },
   {
     id: 'actions',
@@ -163,7 +172,8 @@ export default function TableTable() {
   const pageIndex = page - 1
   const [tableIdEdit, setTableIdEdit] = useState<number | undefined>()
   const [tableDelete, setTableDelete] = useState<TableItem | null>(null)
-  const data: any[] = []
+  const tableListQuery = useTableListQuery()
+  const data = tableListQuery.data?.payload?.data ?? []
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
