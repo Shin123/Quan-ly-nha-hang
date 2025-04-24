@@ -1,5 +1,6 @@
 'use client'
 
+import revalidateApiRequest from '@/apiRequests/revalidate'
 import { AlertDialogFooter } from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -87,6 +88,7 @@ export default function AddDish() {
         }
       }
       const result = await addDishMutation.mutateAsync(body)
+      await revalidateApiRequest('dishes')
       toast({
         description: result.payload.message,
       })
