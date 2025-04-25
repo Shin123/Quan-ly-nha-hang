@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { decodeToken } from './lib/utils'
+import { Role } from './constants/type'
 
-const privatePaths = ['/manage']
+const managePaths = ['/manage']
+const guestPaths = ['/guest']
+const privatePaths = [...managePaths, ...guestPaths]
 const unAuthPaths = ['/login']
 
 // This function can be marked `async` if using `await` inside
@@ -17,26 +21,38 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // auth will can't access to unAuth paths
-  if (unAuthPaths.some((path) => pathname.startsWith(path)) && refreshToken) {
-    return NextResponse.redirect(new URL('/', request.url))
+  if (refreshToken) {
+    // auth will can't access to unAuth paths
+    if (unAuthPaths.some((path) => pathname.startsWith(path)) && refreshToken) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+
+    // isAuth &&  access token expired
+    if (
+      privatePaths.some((path) => pathname.startsWith(path) && !accessToken)
+    ) {
+      const url = new URL('/refresh-token', request.url)
+      url.searchParams.set('refreshToken', refreshToken)
+      url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
+    }
+
+    // Permission by role of user
+    const role = decodeToken(refreshToken).role
+    if (
+      (role === Role.Guest &&
+        managePaths.some((path) => pathname.startsWith(path))) ||
+      (role !== Role.Guest &&
+        guestPaths.some((path) => pathname.startsWith(path)))
+    ) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
   }
 
-  // isAuth &&  access token expired
-  if (
-    privatePaths.some(
-      (path) => pathname.startsWith(path) && !accessToken && refreshToken
-    )
-  ) {
-    const url = new URL('/refresh-token', request.url)
-    url.searchParams.set('refreshToken', refreshToken)
-    url.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(url)
-  }
   return NextResponse.next()
 }
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ['/manage/:path*', '/login'],
+  matcher: ['/manage/:path*', '/guest/:path*', '/login'],
 }
