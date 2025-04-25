@@ -1,13 +1,12 @@
 'use client'
+import { RoleType } from '@/app/types/jwt.types'
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query'
+  decodeToken,
+  getAccessTokenFromLocalStorage,
+  removeTokenFromLocalStorage,
+} from '@/lib/utils'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import RefreshToken from './refresh-token'
 import {
   createContext,
   useCallback,
@@ -15,10 +14,7 @@ import {
   useEffect,
   useState,
 } from 'react'
-import {
-  getAccessTokenFromLocalStorage,
-  removeTokenFromLocalStorage,
-} from '@/lib/utils'
+import RefreshToken from './refresh-token'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,7 +27,8 @@ const queryClient = new QueryClient({
 
 const AppContext = createContext({
   isAuth: false,
-  setIsAuth: (isAuth: boolean) => {},
+  role: undefined as RoleType | undefined,
+  setRole: (role?: RoleType | undefined) => {},
 })
 
 export const useAppContext = () => {
@@ -43,25 +40,26 @@ export default function AppProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [isAuth, setIsAuthState] = useState(false)
+  const [role, setRoleState] = useState<RoleType | undefined>()
 
   useEffect(() => {
     const accessToken = getAccessTokenFromLocalStorage()
     if (accessToken) {
-      setIsAuthState(true)
+      const role = decodeToken(accessToken).role
+      setRoleState(role)
     }
   }, [])
-  const setIsAuth = useCallback((isAuth: boolean) => {
-    if (isAuth) {
-      setIsAuthState(true)
-    } else {
-      setIsAuthState(false)
+  const setRole = useCallback((role?: RoleType | undefined) => {
+    setRoleState(role)
+    if (!role) {
       removeTokenFromLocalStorage()
     }
   }, [])
 
+  const isAuth = Boolean(role)
+
   return (
-    <AppContext.Provider value={{ isAuth, setIsAuth }}>
+    <AppContext.Provider value={{ role, setRole, isAuth }}>
       <QueryClientProvider client={queryClient}>
         {children}
         <RefreshToken />
