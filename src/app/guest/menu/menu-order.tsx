@@ -6,11 +6,37 @@ import { formatCurrency } from '@/lib/utils'
 import { useGetDishList } from '@/queries/useDish'
 import { Minus, Plus } from 'lucide-react'
 import Image from 'next/image'
+import Quantity from './quantity'
+import { useMemo, useState } from 'react'
+import { GuestCreateOrdersBodyType } from '@/schemaValidations/guest.schema'
 
 export default function MenuOrder() {
   const { data } = useGetDishList()
-  const dishes = data?.payload.data ?? []
+  const dishes = useMemo(() => data?.payload.data ?? [], [data])
+  const [orders, setOrders] = useState<GuestCreateOrdersBodyType>([])
+  const totalPrice = useMemo(() => {
+    return dishes.reduce((result, dish) => {
+      const order = orders.find((order) => order.dishId === dish.id)
+      if (!order) return result
+      return result + order.quantity * dish.price
+    }, 0)
+  }, [dishes, orders])
+  const handleQuantityChange = (dishId: number, quantity: number) => {
+    setOrders((prevOrders) => {
+      if (quantity === 0) {
+        return prevOrders.filter((order) => order.dishId !== dishId)
+      }
+      const index = prevOrders.findIndex((order) => order.dishId === dishId)
+      if (index === -1) {
+        return [...prevOrders, { dishId, quantity }]
+      }
+      const newOrders = [...prevOrders]
+      newOrders[index] = { ...newOrders[index], quantity }
+      return newOrders
+    })
+  }
 
+  console.log(orders)
   return (
     <>
       {dishes.map((dish) => (
@@ -33,22 +59,19 @@ export default function MenuOrder() {
             </p>
           </div>
           <div className="flex-shrink-0 ml-auto flex justify-center items-center">
-            <div className="flex gap-1">
-              <Button className="h-6 w-6 p-0">
-                <Minus className="w-3 h-3" />
-              </Button>
-              <Input type="text" readOnly className="h-6 p-1 w-8" />
-              <Button className="h-6 w-6 p-0">
-                <Plus className="w-3 h-3" />
-              </Button>
-            </div>
+            <Quantity
+              onChange={(value) => handleQuantityChange(dish.id, value)}
+              value={
+                orders.find((order) => order.dishId === dish.id)?.quantity ?? 0
+              }
+            />
           </div>
         </div>
       ))}
       <div className="sticky bottom-0">
         <Button className="w-full justify-between">
-          <span>Giỏ hàng · 2 món</span>
-          <span>100,000 đ</span>
+          <span>Giỏ hàng · {orders.length} món</span>
+          <span>{formatCurrency(totalPrice)}</span>
         </Button>
       </div>
     </>
