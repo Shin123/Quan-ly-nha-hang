@@ -14,7 +14,7 @@ export const useUpdateOrderMutation = () => {
 
 export const useGetOrderListQuery = () => {
   return useQuery({
-    queryKey: ['order-list'],
+    queryKey: ['orders'],
     queryFn: orderApiRequest.getOrderList,
   })
 }
