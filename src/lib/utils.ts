@@ -1,7 +1,7 @@
 import authApiRequest from '@/apiRequests/auth'
 import { TokenPayload } from '@/app/types/jwt.types'
 import envConfig from '@/config'
-import { DishStatus, Role, TableStatus } from '@/constants/type'
+import { DishStatus, OrderStatus, Role, TableStatus } from '@/constants/type'
 import { toast } from '@/hooks/use-toast'
 import { clsx, type ClassValue } from 'clsx'
 import jwt from 'jsonwebtoken'
@@ -146,4 +146,21 @@ export const getTableLink = ({
 
 export const decodeToken = (token: string) => {
   return jwt.decode(token) as TokenPayload
+}
+
+export const getVietnameseOrderStatus = (
+  status: (typeof OrderStatus)[keyof typeof OrderStatus]
+) => {
+  switch (status) {
+    case OrderStatus.Delivered:
+      return 'Đã phục vụ'
+    case OrderStatus.Paid:
+      return 'Đã thanh toán'
+    case OrderStatus.Pending:
+      return 'Chờ xử lý'
+    case OrderStatus.Processing:
+      return 'Đang nấu'
+    default:
+      return 'Từ chối'
+  }
 }
